@@ -1,5 +1,5 @@
 {
-  "name": "githubdb",
+  "name": "@raphael-08/gdb",
   "version": "0.0.1",
   "description": "",
   "main": "dist/index.js",
