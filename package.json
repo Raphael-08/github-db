@@ -1,9 +1,9 @@
 {
   "name": "@raphael-08/gdb",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "",
   "main": "dist/index.js",
-  "bin" : "dist/index.js",
+  "bin": "dist/index.js",
   "types": "dist/types/index.d.ts",
   "type": "module",
   "scripts": {
@@ -21,6 +21,7 @@
   "dependencies": {
     "@antfu/ni": "^0.21.12",
     "@octokit/rest": "^20.1.1",
+    "@raphael-08/gdb": "^0.1.5",
     "@types/node": "^20.14.5",
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
