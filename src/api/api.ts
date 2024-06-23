@@ -51,7 +51,7 @@ export async function read(path: string, branch: string = 'main'): Promise<strin
     }
 }
 
-export async function write(path: string, content: string, message: string, branch: string = 'main'): Promise<void> {
+export async function write(path: string, content: string, message: string, branch: string = 'main'): Promise<void | string> {
     try {
         const fileContent = Buffer.from(content).toString('base64');
 
@@ -64,10 +64,8 @@ export async function write(path: string, content: string, message: string, bran
             branch,
         });
 
-        console.log('File committed successfully');
     } catch (error) {
-        console.error('Error creating/updating file:', error);
-        throw error;
+        return error
     }
 }
 

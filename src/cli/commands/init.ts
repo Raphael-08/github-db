@@ -1,5 +1,5 @@
 import { getPackageManager } from "../utils/get-pacman";
-import chalk from "chalk";
+import { logger } from "../utils/logger";
 import { Command } from "commander";
 import { execa } from "execa";
 import fs, { existsSync } from "fs";
@@ -8,20 +8,13 @@ import path from "path";
 import prompts from "prompts";
 import { z } from "zod";
 
-const logger = {
-    info: (text: string) => chalk.cyan(text),
-    success: (text: string) => chalk.greenBright(text),
-    error: (text: string) => chalk.redBright(text),
-    warning: (text: string) => chalk.yellowBright(text),
-};
-
 const initOptionSchema = z.object({
     cwd: z.string()
 })
 
 export const init = new Command()
     .name("init")
-    .description("initializes the data base")
+    .description("initializes your project for github-db")
     .option(
         "-c, --cwd <cwd>",
         "the working directory. defaults to the current directory.",

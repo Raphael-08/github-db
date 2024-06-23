@@ -1,6 +1,7 @@
 #! /usr/bin/env node
-import { init } from "./commands/init.js";
-import { packageJSON } from "./utils/package-json.js";
+import { init } from "./commands/init";
+import { createdb } from "./commands/createdb";
+import { packageJSON } from "./utils/package-json";
 import { Command } from "commander";
 
 (async () => {
@@ -17,5 +18,6 @@ import { Command } from "commander";
 
   program
     .addCommand(init)
+    .addCommand(createdb)
   program.parse();
 })();
