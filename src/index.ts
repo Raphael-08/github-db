@@ -1,2 +1,4 @@
-import "./api/api"
-import "./cli/cli"
+import * as api from "./api/api"
+import * as cli from "./cli/cli"
+
+export { api, cli }
