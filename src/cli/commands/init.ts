@@ -83,7 +83,7 @@ async function install(cwd: string) {
 }
 function writeToEnv(info: string, cwd: string) {
 
-    const filePath = path.join(cwd, ".test");
+    const filePath = path.join(cwd, ".env");
     fs.writeFile(filePath, info, (err) => {
         if (err) {
             console.error('Error writing file:', err);
