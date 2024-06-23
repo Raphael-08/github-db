@@ -1,6 +1,7 @@
 #! /usr/bin/env node
 import { init } from "./commands/init";
 import { createdb } from "./commands/createdb";
+import { createCollection } from "./commands/createCollection"
 import { packageJSON } from "./utils/package-json";
 import { Command } from "commander";
 
@@ -19,5 +20,6 @@ import { Command } from "commander";
   program
     .addCommand(init)
     .addCommand(createdb)
+    .addCommand(createCollection)
   program.parse();
 })();
