@@ -1,10 +1,10 @@
 {
   "name": "@raphael-08/gdb",
-  "version": "0.1.11",
+  "version": "0.1.13",
   "description": "",
   "main": "dist/api/api.js",
   "bin": "dist/cli/cli.js",
-  "types": "dist/types/index.d.ts",
+  "types": "./dist/types",
   "type": "module",
   "scripts": {
     "build": "rm -rf dist && tsup && tsc --emitDeclarationOnly",
@@ -22,7 +22,6 @@
   "dependencies": {
     "@antfu/ni": "^0.21.12",
     "@octokit/rest": "^20.1.1",
-    "@raphael-08/gdb": "^0.1.5",
     "@types/node": "^20.14.5",
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
