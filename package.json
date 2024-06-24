@@ -1,13 +1,13 @@
 {
   "name": "@raphael-08/gdb",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "",
   "main": "dist/api/api.js",
   "bin": "dist/cli/cli.js",
   "types": "dist/types/index.d.ts",
   "type": "module",
   "scripts": {
-    "build": "rm -rf dist && tsup src/* --format esm --clean --minify --metafile && tsc --emitDeclarationOnly",
+    "build": "rm -rf dist && tsup && tsc --emitDeclarationOnly",
     "dev": "tsup src/index.ts --format esm --watch --clean --onSuccess \"node dist/index.js\"",
     "test": "node dist/index.js"
   },
@@ -15,6 +15,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "glob": "^10.4.2",
     "tsup": "^8.1.0",
     "typescript": "^5.4.5"
   },
