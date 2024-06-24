@@ -12,9 +12,9 @@ const createdbOptionsSchema = z.object({
 export const createdb = new Command()
     .name("createdb")
     .description("creates a database")
-    .argument("[names...]", "the components to add")
-    .action(async (names) => {
-        const options = createdbOptionsSchema.parse({ dbs: names })
+    .argument("[dbs...]", "the components to add")
+    .action(async (dbs) => {
+        const options = createdbOptionsSchema.parse({ dbs })
         if (!options.dbs.length) {
             ora(logger.error("pls provide a name for data base")).fail()
             process.exit()

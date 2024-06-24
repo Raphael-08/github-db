@@ -32,7 +32,7 @@ export const init = new Command()
 
         const info = await getEnvInfo()
         const spinner = ora("initializing your project").start()
-        await writeToEnv(info,cwd)
+        writeToEnv(info,cwd)
         spinner.stop()
         ora("created env file!").succeed()
         spinner.start()
@@ -62,6 +62,11 @@ async function getEnvInfo() {
             initial: "",
         }
     ])
+
+    if(options.GAT === undefined || options.user === undefined || options.repo === undefined){
+        console.log(logger.error("fields are left empty!"))
+        process.exit()
+    }
 
     const env = `GITHUB_TOKEN="${options.GAT}"\nGITHUB_REPO_OWNER="${options.user}"\nGITHUB_REPO_NAME="${options.repo}"`
 
