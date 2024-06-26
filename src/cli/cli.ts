@@ -2,6 +2,7 @@
 import { init } from "./commands/init";
 import { createdb } from "./commands/createdb";
 import { createCollection } from "./commands/createCollection"
+import { insert } from "./commands/insert";
 import { packageJSON } from "./utils/package-json";
 import { Command } from "commander";
 
@@ -21,5 +22,6 @@ import { Command } from "commander";
     .addCommand(init)
     .addCommand(createdb)
     .addCommand(createCollection)
+    .addCommand(insert)
   program.parse();
 })();
