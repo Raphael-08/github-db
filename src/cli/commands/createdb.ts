@@ -1,8 +1,7 @@
-import { write } from "@/api/api";
+import { createdb as create } from "@/api/api";
 import { logger } from "../utils/logger";
 import { Command } from "commander";
 import ora from "ora";
-import path from "path";
 import { z } from "zod";
 
 const createdbOptionsSchema = z.object({
@@ -12,7 +11,7 @@ const createdbOptionsSchema = z.object({
 export const createdb = new Command()
     .name("createdb")
     .description("creates a database")
-    .argument("[dbs...]", "the components to add")
+    .argument("[dbs...]", "names of databases")
     .action(async (dbs) => {
         const options = createdbOptionsSchema.parse({ dbs })
         if (!options.dbs.length) {
@@ -21,16 +20,3 @@ export const createdb = new Command()
         }
         await create(options.dbs)
     })
-
-async function create(names: string[]) {
-    for (const element of names) {
-        const dbPath = path.join(element, ".gitkeep")
-        const error = await write(dbPath, "", "dbwrite")
-        if (error) {
-            ora(`${logger.error(`database already present with name ${logger.warning(element)}`)}`).fail()
-        }
-        else {
-            ora(`database created with name ${logger.info(element)}`).succeed()
-        }
-    }
-}
