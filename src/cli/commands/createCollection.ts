@@ -28,9 +28,17 @@ export const createCollection = new Command()
 async function parser(str: string): Promise<ParserResult> {
 
     let schema: SchemaField[] = []
-    const parts = str.split('{');
-    const colName: string = parts[0].trim();
-    const propertiesPart = parts[1].replace('}', '').trim();
+    const regex = /^(\w+)\s*\{(.+)\}$/;
+    const match = str.match(regex);
+    let colName, propertiesPart
+    if (match) {
+        colName = match[1];
+        propertiesPart = match[2];
+    } else {
+        ora(logger.error(`Input format is incorrect.`)).fail(); 
+        ora(`you can check input format using ${logger.info('npx @raphael-08/gdb@latest help <command>')}`).info();
+        process.exit(0);
+    }
     const properties = propertiesPart.split(',');
     properties.forEach((property) => {
         const [propertyName, propertyType] = property.split(':').map(part => part.trim());
