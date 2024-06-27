@@ -11,7 +11,7 @@ import { Command } from "commander";
 
   program
     .name(">")
-    .description("⚡️ raphael-08/ui.")
+    .description("⚡️ github-db")
     .version(
       packageJSON.version,
       "-v, --version",
