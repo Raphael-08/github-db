@@ -25,7 +25,7 @@ export const insert = new Command()
             process.exit()
         }
 
-        insertItems(db, colName, data)
+        insertItems(db, colName, data, true)
 
     })
 

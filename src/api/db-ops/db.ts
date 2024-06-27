@@ -43,9 +43,9 @@ export async function createCol(db: string, col: string, schema: SchemaField[]) 
     }
 }
 
-export async function insert(db: string, col: string, data) {
+export async function insert(db: string, col: string, data, Dtypes: boolean = false) {
 
-    const validatedData = await validate(db,col,data)
+    const validatedData = await validate(db, col, data, Dtypes)
     const tablePath = path.join(db, col + ".json")
     const table = JSON.parse(await read(tablePath))
     table.push(validatedData)
@@ -60,15 +60,17 @@ function createType(metadata: SchemaField[]) {
     return reducedMD
 }
 
-async function validate(db: string, col: string, data) {
+async function validate(db: string, col: string, data, Dtypes: boolean) {
 
     const metaDataPath = path.join(db, "metadata", col + ".json")
     const metaData = await read(metaDataPath)
     const fields = JSON.parse(metaData)
     const type = createType(fields)
-    Object.keys(data).forEach(key => {
-        data[key] = types[type[key]][1](data[key])
-    });
+    if (Dtypes) {
+        Object.keys(data).forEach(key => {
+            data[key] = types[type[key]][1](data[key])
+        });
+    }
     const schemaObject = Object.fromEntries(
         fields.map((field) => [field.field, types[field.fieldType][0]])
     )
