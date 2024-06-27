@@ -8,34 +8,40 @@ interface SchemaField {
     fieldType: string;
 }
 
-type ParserResult = [string, SchemaField[]];
-
 export const createCollection = new Command()
     .name("createCollection")
     .description("creates a collection")
     .argument("[db]", "name of the database to create the collection in")
-    .argument("[table...]", "name of the collection with columns and datatypes like this \n<collection name>{col1:type,col2:type,col3:type}")
-    .action(async (db, str) => {
-        const [colName, schema] = await parser(str.join(' '))
-
+    .argument("[colName]", "name of the collection")
+    .argument("[data...]", "datatypes like this \n<collection name>[col1:type,col2:type,col3:type]")
+    .action(async (db, colName, data) => {
+        if (!data.length) {
+            ora(logger.error("incorrect syntax to check systax do help(<command>)")).fail()
+            process.exit()
+        }
+        const combinedData = Array.isArray(data) ? data.join(' ') : data;
+        const schema = await parser(combinedData)
         if (!db.length) {
             ora(logger.error("pls provide a database to create collection")).fail()
+            process.exit()
+        }
+        if (!colName.length) {
+            ora(logger.error("pls provide a collection to create")).fail()
             process.exit()
         }
         await createCol(db, colName, schema)
     })
 
-async function parser(str: string): Promise<ParserResult> {
+async function parser(str: string): Promise<SchemaField[]> {
 
     let schema: SchemaField[] = []
-    const regex = /^(\w+)\s*\{(.+)\}$/;
+    const regex = /\[\s*([^}]*)\s*\]/
     const match = str.match(regex);
-    let colName, propertiesPart
+    let propertiesPart
     if (match) {
-        colName = match[1];
-        propertiesPart = match[2];
+        propertiesPart = match[1];
     } else {
-        ora(logger.error(`Input format is incorrect.`)).fail(); 
+        ora(logger.error(`Input format is incorrect.`)).fail();
         ora(`you can check input format using ${logger.info('npx @raphael-08/gdb@latest help <command>')}`).info();
         process.exit(0);
     }
@@ -48,5 +54,5 @@ async function parser(str: string): Promise<ParserResult> {
         };
         schema.push(field)
     })
-    return [colName, schema]
+    return schema
 }
