@@ -11,7 +11,11 @@ interface SchemaField {
 
 const types = {
     "number": [z.number(), Number],
-    "string": [z.string(), String]
+    "string": [z.string(), String],
+    "boolean": [z.boolean(), Boolean],
+    "date": [z.date(), Date],
+    "null": [z.null(), null],
+    "undefined": [z.undefined(), undefined],
 }
 
 type tableType = {
