@@ -11,7 +11,7 @@ export const insert = new Command()
     .argument("[records...]", "the data to be inserted in the format [key:value,key:value]")
     .action(async (db, colName, records) => {
         if (!records.length) {
-            ora(logger.error("incorrect syntax to check systax do help(<command>)")).fail()
+            ora(logger.error("incorrect syntax to check syntax do help(<command>)")).fail()
             process.exit()
         }
         const combinedData = Array.isArray(records) ? records.join(' ') : records;
@@ -27,7 +27,7 @@ export const insert = new Command()
             process.exit()
         }
 
-        insertItems(db, colName, data, true)
+        insertItems(db, colName, [data], true)
 
     })
 

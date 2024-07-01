@@ -16,7 +16,7 @@ export const createCollection = new Command()
     .argument("[data...]", "datatypes like this \n<collection name>[col1:type,col2:type,col3:type]")
     .action(async (db, colName, data) => {
         if (!data.length) {
-            ora(logger.error("incorrect syntax to check systax do help(<command>)")).fail()
+            ora(logger.error("incorrect syntax to check syntax do help(<command>)")).fail()
             process.exit()
         }
         const combinedData = Array.isArray(data) ? data.join(' ') : data;
