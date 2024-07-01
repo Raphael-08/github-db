@@ -118,10 +118,10 @@ export async function rollBack() {
 
 }
 
-export async function findAll(db: string, col: string, query) {
+export async function findAll(db: string, col: string, query: tableType) {
     const tablePath = path.join(db, col + ".json")
     const table = JSON.parse(await read(tablePath))
-    const filteredData = table.filter((data) => {
+    const filteredData = table.filter((data: tableType) => {
         let flag = true
         Object.keys(query).forEach((key) => {
             if (data[key] !== query[key]) {
