@@ -3,6 +3,9 @@ import { init } from "./commands/init";
 import { createdb } from "./commands/createdb";
 import { createCollection } from "./commands/createCollection"
 import { insert } from "./commands/insert";
+import { transactionStart } from "./commands/startTransaction";
+import { succeedTransaction } from "./commands/succeedTransaction";
+import { rollBack } from "./commands/rollback";
 import { packageJSON } from "./utils/package-json";
 import { Command } from "commander";
 
@@ -23,5 +26,8 @@ import { Command } from "commander";
     .addCommand(createdb)
     .addCommand(createCollection)
     .addCommand(insert)
+    .addCommand(transactionStart)
+    .addCommand(succeedTransaction)
+    .addCommand(rollBack)
   program.parse();
 })();

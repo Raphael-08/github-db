@@ -1,7 +1,7 @@
 import ora from "ora"
 import path from "path"
 import z from "zod"
-import { write, read, update } from "../api"
+import { write, read, update, getLatestCommitSha, deleteFile, updateRef } from "../api"
 import { logger } from "@/cli/utils/logger"
 
 interface SchemaField {
@@ -77,4 +77,21 @@ async function validate(db: string, col: string, data, Dtypes: boolean) {
     const schema = z.object(schemaObject);
     const validatedData = schema.parse(data)
     return validatedData
+}
+
+export async function startTransaction(){
+    const savedCommit = await getLatestCommitSha();
+    const convertedData = [{transactionCommit: savedCommit}]
+    await write("transaction.json", JSON.stringify(convertedData), "transaction-write")
+}
+
+export async function transactionSuccess(){
+    await deleteFile("transaction.json")
+}
+
+export async function rollBack() {
+    const transactionDtails = await read("transaction.json")
+    const parsedData = JSON.parse(transactionDtails)
+    await updateRef(parsedData[0].transactionCommit)
+    
 }
