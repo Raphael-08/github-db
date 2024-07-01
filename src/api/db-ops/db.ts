@@ -54,7 +54,7 @@ export async function insert(db: string, col: string, data: tableType[], Dtypes:
     for (const item of validatedData) {
         table.push(item)
     }
-    await update(tablePath, JSON.stringify(table), "insert-write")
+    await update(tablePath, JSON.stringify(table,null,2), "insert-write")
 }
 
 function createType(metadata: SchemaField[]) {
@@ -82,8 +82,8 @@ async function validate(db: string, col: string, data: tableType[], Dtypes: bool
             });
         }
     }
-    let validatedData: tableType[]
-    for(const item in data){
+    let validatedData: tableType[] = []
+    for(const item of data){
         const parsedData = schema.parse(item)
         validatedData.push(parsedData)
     }
@@ -114,7 +114,7 @@ export async function rollBack() {
 
 }
 
-export async function find(db: string, col: string, query) {
+export async function findAll(db: string, col: string, query) {
     const tablePath = path.join(db, col + ".json")
     const table = JSON.parse(await read(tablePath))
     const filteredData = table.filter((data) => {
@@ -127,4 +127,39 @@ export async function find(db: string, col: string, query) {
         return flag
     })
     return filteredData
+}
+
+export async function deleteMany(db: string, col: string, query: tableType) {
+    const tablePath = path.join(db, col + ".json")
+    const table = JSON.parse(await read(tablePath))
+    const filteredData = table.filter((data: tableType) => {
+        let flag = true
+        Object.keys(query).forEach((key) => {
+            if (data[key] !== query[key]) {
+                flag = false
+            }
+        })
+        return !flag
+    })
+    await update(tablePath, JSON.stringify(filteredData, null, 2), "delete-write")
+}
+
+export async function updateMany(db: string, col: string, query: tableType, updateData: tableType) {
+    const tablePath = path.join(db, col + ".json")
+    const table = JSON.parse(await read(tablePath))
+    const updatedData = table.map((data: tableType) => {
+        let flag = true
+        Object.keys(query).forEach((key) => {
+            if (data[key] !== query[key]) {
+                flag = false
+            }
+        })
+        if (flag) {
+            Object.keys(updateData).forEach((key) => {
+                data[key] = updateData[key]
+            })
+        }
+        return data
+    })
+    await update(tablePath, JSON.stringify(updatedData, null, 2), "update-write")
 }
