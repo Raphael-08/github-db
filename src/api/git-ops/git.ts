@@ -8,104 +8,124 @@ const OWNER = process.env.GITHUB_REPO_OWNER;
 const REPO = process.env.GITHUB_REPO_NAME;
 
 const octokit = new Octokit({
-    auth: GITHUB_TOKEN,
+  auth: GITHUB_TOKEN,
 });
 
+export async function getLatestCommitSha() {
+  const refData = await octokit.git.getRef({
+    owner: OWNER,
+    repo: REPO,
+    ref: 'heads/main'
+  })
+  return refData.data.object.sha;
+}
+
+export async function updateRef(commitSha: string) {
+  await octokit.git.updateRef({
+    owner: OWNER,
+    repo: REPO,
+    ref: `heads/main`,
+    sha: commitSha,
+    force: true
+  });
+
+}
+
 export async function getFileSha(path: string, branch: string = 'main'): Promise<string> {
-    try {
-      const { data } = await octokit.repos.getContent({
-        owner: OWNER,
-        repo: REPO,
-        path,
-        ref: branch,
-      });
-  
-      if ('sha' in data) {
-        return data.sha;
-      }
-      throw new Error('SHA not found in file data');
-    } catch (error) {
-      console.error('Error fetching file SHA:', error);
-      throw error;
+  try {
+    const { data } = await octokit.repos.getContent({
+      owner: OWNER,
+      repo: REPO,
+      path,
+      ref: branch,
+    });
+
+    if ('sha' in data) {
+      return data.sha;
     }
+    throw new Error('SHA not found in file data');
+  } catch (error) {
+    console.error('Error fetching file SHA:', error);
+    throw error;
   }
+}
 
 export async function read(path: string, branch: string = 'main'): Promise<string> {
-    try {
-        const { data } = await octokit.repos.getContent({
-            owner: OWNER,
-            repo: REPO,
-            path,
-            ref: branch,
-        });
+  try {
+    const { data } = await octokit.repos.getContent({
+      owner: OWNER,
+      repo: REPO,
+      path,
+      ref: branch,
+    });
 
-        if ('content' in data) {
-            const content = Buffer.from(data.content, 'base64').toString('utf8');
-            return content;
-        }
-
-        throw new Error('Content not found in file data');
-    } catch (error) {
-        console.error('Error fetching file:', error);
-        throw error;
+    if ('content' in data) {
+      const content = Buffer.from(data.content, 'base64').toString('utf8');
+      return content;
     }
+
+    throw new Error('Content not found in file data');
+  } catch (error) {
+    console.error('Error fetching file:', error);
+    throw error;
+  }
 }
 
 export async function write(path: string, content: string, message: string, branch: string = 'main'): Promise<void | string> {
-    try {
-        const fileContent = Buffer.from(content).toString('base64');
+  try {
+    const fileContent = Buffer.from(content).toString('base64');
 
-        await octokit.repos.createOrUpdateFileContents({
-            owner: OWNER,
-            repo: REPO,
-            path,
-            message,
-            content: fileContent,
-            branch,
-        });
+    await octokit.repos.createOrUpdateFileContents({
+      owner: OWNER,
+      repo: REPO,
+      path,
+      message,
+      content: fileContent,
+      branch,
+    });
 
-    } catch (error) {
-        return error
-    }
+  } catch (error) {
+    return error
+  }
 }
 
 export async function update(path: string, content: string, message: string, branch: string = 'main'): Promise<void | string> {
   const sha = await getFileSha(path, branch);
   try {
-      const fileContent = Buffer.from(content).toString('base64');
+    const fileContent = Buffer.from(content).toString('base64');
 
-      await octokit.repos.createOrUpdateFileContents({
-          owner: OWNER,
-          repo: REPO,
-          path,
-          message,
-          content: fileContent,
-          branch,
-          sha
-      });
+    await octokit.repos.createOrUpdateFileContents({
+      owner: OWNER,
+      repo: REPO,
+      path,
+      message,
+      content: fileContent,
+      branch,
+      sha
+    });
 
   } catch (error) {
-      return error
+    return error
   }
 }
 
 export async function deleteFile(path: string, branch: string = 'main'): Promise<void> {
-    try {
-      const sha = await getFileSha(path, branch);
-      const message = `Delete file ${path}`;
-  
-      await octokit.repos.deleteFile({
-        owner: OWNER,
-        repo: REPO,
-        path,
-        message,
-        sha,
-        branch,
-      });
-  
-      console.log(`File '${path}' deleted successfully`);
-    } catch (error) {
-      console.error('Error deleting file:', error);
-      throw error;
-    }
+  try {
+    const sha = await getFileSha(path, branch);
+    const message = `Delete file ${path}`;
+
+    await octokit.repos.deleteFile({
+      owner: OWNER,
+      repo: REPO,
+      path,
+      message,
+      sha,
+      branch,
+    });
+
+    console.log(`File '${path}' deleted successfully`);
+  } catch (error) {
+    console.error('Error deleting file:', error);
+    throw error;
   }
+}

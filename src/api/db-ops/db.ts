@@ -1,7 +1,7 @@
 import ora from "ora"
 import path from "path"
 import z from "zod"
-import { write, read, update } from "../api"
+import { write, read, update, getLatestCommitSha, deleteFile, updateRef } from "../api"
 import { logger } from "@/cli/utils/logger"
 
 interface SchemaField {
@@ -14,6 +14,9 @@ const types = {
     "string": [z.string(), String]
 }
 
+type tableType = {
+    [key: string]: any;
+}
 
 export async function createdb(names: string[]) {
     for (const element of names) {
@@ -43,13 +46,15 @@ export async function createCol(db: string, col: string, schema: SchemaField[]) 
     }
 }
 
-export async function insert(db: string, col: string, data, Dtypes: boolean = false) {
+export async function insert(db: string, col: string, data: tableType[], Dtypes: boolean = false) {
 
     const validatedData = await validate(db, col, data, Dtypes)
     const tablePath = path.join(db, col + ".json")
     const table = JSON.parse(await read(tablePath))
-    table.push(validatedData)
-    await update(tablePath, JSON.stringify(table), "insert-write")
+    for (const item of validatedData) {
+        table.push(item)
+    }
+    await update(tablePath, JSON.stringify(table,null,2), "insert-write")
 }
 
 function createType(metadata: SchemaField[]) {
@@ -60,21 +65,101 @@ function createType(metadata: SchemaField[]) {
     return reducedMD
 }
 
-async function validate(db: string, col: string, data, Dtypes: boolean) {
+async function validate(db: string, col: string, data: tableType[], Dtypes: boolean): Promise<tableType[]> {
 
     const metaDataPath = path.join(db, "metadata", col + ".json")
     const metaData = await read(metaDataPath)
     const fields = JSON.parse(metaData)
     const type = createType(fields)
-    if (Dtypes) {
-        Object.keys(data).forEach(key => {
-            data[key] = types[type[key]][1](data[key])
-        });
-    }
     const schemaObject = Object.fromEntries(
         fields.map((field) => [field.field, types[field.fieldType][0]])
     )
     const schema = z.object(schemaObject);
-    const validatedData = schema.parse(data)
+    if (Dtypes) {
+        for (const item of data) {
+            Object.keys(item).forEach(key => {
+                item[key] = types[type[key]][1](item[key])
+            });
+        }
+    }
+    let validatedData: tableType[] = []
+    for(const item of data){
+        const parsedData = schema.parse(item)
+        validatedData.push(parsedData)
+    }
     return validatedData
+}
+
+export async function startTransaction() {
+    const savedCommit = await getLatestCommitSha();
+    const convertedData = [{ transactionCommit: savedCommit }]
+    await write("transaction.json", JSON.stringify(convertedData), "transaction-write")
+}
+
+export async function transactionSuccess() {
+    await deleteFile("transaction.json")
+}
+
+export async function rollBack() {
+    let transactionDetails: string
+    try {
+        transactionDetails = await read("transaction.json")
+    }
+    catch {
+        ora(`${logger.error(`No transaction to rollback`)}`).fail()
+        return
+    }
+    const parsedData = JSON.parse(transactionDetails)
+    await updateRef(parsedData[0].transactionCommit)
+
+}
+
+export async function findAll(db: string, col: string, query) {
+    const tablePath = path.join(db, col + ".json")
+    const table = JSON.parse(await read(tablePath))
+    const filteredData = table.filter((data) => {
+        let flag = true
+        Object.keys(query).forEach((key) => {
+            if (data[key] !== query[key]) {
+                flag = false
+            }
+        })
+        return flag
+    })
+    return filteredData
+}
+
+export async function deleteMany(db: string, col: string, query: tableType) {
+    const tablePath = path.join(db, col + ".json")
+    const table = JSON.parse(await read(tablePath))
+    const filteredData = table.filter((data: tableType) => {
+        let flag = true
+        Object.keys(query).forEach((key) => {
+            if (data[key] !== query[key]) {
+                flag = false
+            }
+        })
+        return !flag
+    })
+    await update(tablePath, JSON.stringify(filteredData, null, 2), "delete-write")
+}
+
+export async function updateMany(db: string, col: string, query: tableType, updateData: tableType) {
+    const tablePath = path.join(db, col + ".json")
+    const table = JSON.parse(await read(tablePath))
+    const updatedData = table.map((data: tableType) => {
+        let flag = true
+        Object.keys(query).forEach((key) => {
+            if (data[key] !== query[key]) {
+                flag = false
+            }
+        })
+        if (flag) {
+            Object.keys(updateData).forEach((key) => {
+                data[key] = updateData[key]
+            })
+        }
+        return data
+    })
+    await update(tablePath, JSON.stringify(updatedData, null, 2), "update-write")
 }

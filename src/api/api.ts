@@ -1,4 +1,4 @@
-import { read, write, update, deleteFile } from "./git-ops/git"
-export { read, write, update, deleteFile }
-import { createdb, createCol, insert } from "./db-ops/db"
-export { createdb, createCol, insert }
+import { read, write, update, deleteFile, getLatestCommitSha, updateRef } from "./git-ops/git"
+export { read, write, update, deleteFile, getLatestCommitSha, updateRef }
+import { createdb, createCol, insert, startTransaction, transactionSuccess, rollBack } from "./db-ops/db"
+export { createdb, createCol, insert, startTransaction, transactionSuccess,rollBack }
