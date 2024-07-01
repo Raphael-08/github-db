@@ -90,7 +90,14 @@ export async function transactionSuccess(){
 }
 
 export async function rollBack() {
-    const transactionDtails = await read("transaction.json")
+    let transactionDtails: string
+    try{
+        transactionDtails = await read("transaction.json")
+    }
+    catch{
+        ora(`${logger.error(`No transaction to rollback`)}`).fail()
+        return
+    }
     const parsedData = JSON.parse(transactionDtails)
     await updateRef(parsedData[0].transactionCommit)
     
