@@ -1,5 +1,5 @@
-import { Octokit } from '@octokit/rest';
-import * as dotenv from 'dotenv';
+import { Octokit } from "@octokit/rest";
+import * as dotenv from "dotenv";
 
 dotenv.config();
 
@@ -15,8 +15,8 @@ export async function getLatestCommitSha() {
   const refData = await octokit.git.getRef({
     owner: OWNER,
     repo: REPO,
-    ref: 'heads/main'
-  })
+    ref: "heads/main",
+  });
   return refData.data.object.sha;
 }
 
@@ -26,12 +26,14 @@ export async function updateRef(commitSha: string) {
     repo: REPO,
     ref: `heads/main`,
     sha: commitSha,
-    force: true
+    force: true,
   });
-
 }
 
-export async function getFileSha(path: string, branch: string = 'main'): Promise<string> {
+export async function getFileSha(
+  path: string,
+  branch: string = "main"
+): Promise<string> {
   try {
     const { data } = await octokit.repos.getContent({
       owner: OWNER,
@@ -40,17 +42,20 @@ export async function getFileSha(path: string, branch: string = 'main'): Promise
       ref: branch,
     });
 
-    if ('sha' in data) {
+    if ("sha" in data) {
       return data.sha;
     }
-    throw new Error('SHA not found in file data');
+    throw new Error("SHA not found in file data");
   } catch (error) {
-    console.error('Error fetching file SHA:', error);
+    console.error("Error fetching file SHA:", error);
     throw error;
   }
 }
 
-export async function read(path: string, branch: string = 'main'): Promise<string> {
+export async function read(
+  path: string,
+  branch: string = "main"
+): Promise<string> {
   try {
     const { data } = await octokit.repos.getContent({
       owner: OWNER,
@@ -59,21 +64,26 @@ export async function read(path: string, branch: string = 'main'): Promise<strin
       ref: branch,
     });
 
-    if ('content' in data) {
-      const content = Buffer.from(data.content, 'base64').toString('utf8');
+    if ("content" in data) {
+      const content = Buffer.from(data.content, "base64").toString("utf8");
       return content;
     }
 
-    throw new Error('Content not found in file data');
+    throw new Error("Content not found in file data");
   } catch (error) {
-    console.error('Error fetching file:', error);
+    console.error("Error fetching file:", error);
     throw error;
   }
 }
 
-export async function write(path: string, content: string, message: string, branch: string = 'main'): Promise<void | string> {
+export async function write(
+  path: string,
+  content: string,
+  message: string,
+  branch: string = "main"
+): Promise<void | string> {
   try {
-    const fileContent = Buffer.from(content).toString('base64');
+    const fileContent = Buffer.from(content).toString("base64");
 
     await octokit.repos.createOrUpdateFileContents({
       owner: OWNER,
@@ -83,16 +93,20 @@ export async function write(path: string, content: string, message: string, bran
       content: fileContent,
       branch,
     });
-
   } catch (error) {
-    return error
+    return error;
   }
 }
 
-export async function update(path: string, content: string, message: string, branch: string = 'main'): Promise<void | string> {
+export async function update(
+  path: string,
+  content: string,
+  message: string,
+  branch: string = "main"
+): Promise<void | string> {
   const sha = await getFileSha(path, branch);
   try {
-    const fileContent = Buffer.from(content).toString('base64');
+    const fileContent = Buffer.from(content).toString("base64");
 
     await octokit.repos.createOrUpdateFileContents({
       owner: OWNER,
@@ -101,15 +115,17 @@ export async function update(path: string, content: string, message: string, bra
       message,
       content: fileContent,
       branch,
-      sha
+      sha,
     });
-
   } catch (error) {
-    return error
+    return error;
   }
 }
 
-export async function deleteFile(path: string, branch: string = 'main'): Promise<void> {
+export async function deleteFile(
+  path: string,
+  branch: string = "main"
+): Promise<void> {
   try {
     const sha = await getFileSha(path, branch);
     const message = `Delete file ${path}`;
@@ -125,7 +141,7 @@ export async function deleteFile(path: string, branch: string = 'main'): Promise
 
     console.log(`File '${path}' deleted successfully`);
   } catch (error) {
-    console.error('Error deleting file:', error);
+    console.error("Error deleting file:", error);
     throw error;
   }
 }

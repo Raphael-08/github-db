@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 import { init } from "./commands/init";
 import { createdb } from "./commands/createdb";
-import { createCollection } from "./commands/createCollection"
+import { createCollection } from "./commands/createCollection";
 import { insert } from "./commands/insert";
 import { transactionStart } from "./commands/startTransaction";
 import { succeedTransaction } from "./commands/succeedTransaction";
@@ -28,6 +28,6 @@ import { Command } from "commander";
     .addCommand(insert)
     .addCommand(transactionStart)
     .addCommand(succeedTransaction)
-    .addCommand(rollBack)
+    .addCommand(rollBack);
   program.parse();
 })();
