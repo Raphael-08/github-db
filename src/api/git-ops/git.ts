@@ -47,7 +47,6 @@ export async function getFileSha(
     }
     throw new Error("SHA not found in file data");
   } catch (error) {
-    console.error("Error fetching file SHA:", error);
     throw error;
   }
 }
@@ -71,7 +70,6 @@ export async function read(
 
     throw new Error("Content not found in file data");
   } catch (error) {
-    console.error("Error fetching file:", error);
     throw error;
   }
 }
@@ -94,7 +92,7 @@ export async function write(
       branch,
     });
   } catch (error) {
-    return error;
+    throw error;
   }
 }
 
@@ -104,8 +102,8 @@ export async function update(
   message: string,
   branch: string = "main"
 ): Promise<void | string> {
-  const sha = await getFileSha(path, branch);
   try {
+    const sha = await getFileSha(path, branch);
     const fileContent = Buffer.from(content).toString("base64");
 
     await octokit.repos.createOrUpdateFileContents({
@@ -118,7 +116,7 @@ export async function update(
       sha,
     });
   } catch (error) {
-    return error;
+    throw error;
   }
 }
 
@@ -138,10 +136,7 @@ export async function deleteFile(
       sha,
       branch,
     });
-
-    console.log(`File '${path}' deleted successfully`);
   } catch (error) {
-    console.error("Error deleting file:", error);
     throw error;
   }
 }
