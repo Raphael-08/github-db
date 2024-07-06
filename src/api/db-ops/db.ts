@@ -32,15 +32,15 @@ type tableType = {
 export async function createdb(names: string[]) {
   for (const element of names) {
     const dbPath = path.join(element, ".gitkeep");
-    const error = await write(dbPath, "", "dbwrite");
-    if (error) {
+    try {
+      write(dbPath, "", "db-write");
+      ora(`database created with name ${logger.info(element)}`).succeed();
+    } catch {
       ora(
         `${logger.error(
           `database already present with name ${logger.warning(element)}`
         )}`
       ).fail();
-    } else {
-      ora(`database created with name ${logger.info(element)}`).succeed();
     }
   }
 }
@@ -54,8 +54,13 @@ export async function createCol(
   const tableMetaDataPath = path.join(db, "metadata", col + ".json");
 
   const finalData = JSON.stringify(schema, null, 2);
-  const error = await write(tablePath, "[]", "col-write");
-  if (error) {
+  try {
+    await write(tablePath, "[]", "col-write");
+    await write(tableMetaDataPath, finalData, "col-data-write");
+    ora(
+      `collection created with name ${logger.info(col)} in ${logger.info(db)}`
+    ).succeed();
+  } catch (error) {
     ora(
       `${logger.error(
         `collection already exists with name ${logger.warning(
@@ -63,11 +68,6 @@ export async function createCol(
         )} in ${logger.warning(db)}`
       )}`
     ).fail();
-  } else {
-    await write(tableMetaDataPath, finalData, "col-data-write");
-    ora(
-      `collection created with name ${logger.info(col)} in ${logger.info(db)}`
-    ).succeed();
   }
 }
 
@@ -79,11 +79,34 @@ export async function insert(
 ) {
   const validatedData = await validate(db, col, data, Dtypes);
   const tablePath = path.join(db, col + ".json");
-  const table = JSON.parse(await read(tablePath));
+  let table: tableType[] = [];
+  try {
+    table = JSON.parse(await read(tablePath));
+  } catch (error) {
+    ora(
+      `${logger.error(
+        `collection with name ${logger.warning(
+          col
+        )} not found in ${logger.warning(db)}`
+      )}`
+    ).fail();
+    return;
+  }
   for (const item of validatedData) {
     table.push(item);
   }
-  await update(tablePath, JSON.stringify(table, null, 2), "insert-write");
+  try {
+    await update(tablePath, JSON.stringify(table, null, 2), "insert-write");
+  } catch {
+    ora(
+      `${logger.error(
+        `collection with name ${logger.warning(
+          col
+        )} not found in ${logger.warning(db)}`
+      )}`
+    ).fail();
+    return;
+  }
 }
 
 function createType(metadata: SchemaField[]) {
@@ -101,11 +124,23 @@ async function validate(
   Dtypes: boolean
 ): Promise<tableType[]> {
   const metaDataPath = path.join(db, "metadata", col + ".json");
-  const metaData = await read(metaDataPath);
+  let metaData: string;
+  try {
+    metaData = await read(metaDataPath);
+  } catch {
+    ora(
+      `${logger.error(
+        `collection with name ${logger.warning(
+          col
+        )} not found in ${logger.warning(db)}`
+      )}`
+    ).fail();
+    return;
+  }
   const fields = JSON.parse(metaData);
   const type = createType(fields);
   const schemaObject = Object.fromEntries(
-    fields.map((field) => [field.field, types[field.fieldType][0]])
+    fields.map((field: SchemaField) => [field.field, types[field.fieldType][0]])
   );
   const schema = z.object(schemaObject);
   if (Dtypes) {
@@ -126,15 +161,24 @@ async function validate(
 export async function startTransaction() {
   const savedCommit = await getLatestCommitSha();
   const convertedData = [{ transactionCommit: savedCommit }];
-  await write(
-    "transaction.json",
-    JSON.stringify(convertedData),
-    "transaction-write"
-  );
+  try {
+    await write(
+      "transaction.json",
+      JSON.stringify(convertedData),
+      "transaction-write"
+    );
+  } catch {
+    ora(`${logger.error(`Transaction already started`)}`).fail();
+  }
 }
 
 export async function transactionSuccess() {
-  await deleteFile("transaction.json");
+  try{
+    await deleteFile("transaction.json");
+  }catch{
+    ora(`${logger.error(`No transaction to succeed`)}`).fail();
+    return;
+  }
 }
 
 export async function rollBack() {
@@ -151,7 +195,19 @@ export async function rollBack() {
 
 export async function findAll(db: string, col: string, query: tableType) {
   const tablePath = path.join(db, col + ".json");
-  const table = JSON.parse(await read(tablePath));
+  let table: tableType[] = [];
+  try {
+    table = JSON.parse(await read(tablePath));
+  } catch {
+    ora(
+      `${logger.error(
+        `collection with name ${logger.warning(
+          col
+        )} not found in ${logger.warning(db)}`
+      )}`
+    ).fail();
+    return;
+  }
   const filteredData = table.filter((data: tableType) => {
     let flag = true;
     Object.keys(query).forEach((key) => {
@@ -166,7 +222,19 @@ export async function findAll(db: string, col: string, query: tableType) {
 
 export async function deleteMany(db: string, col: string, query: tableType) {
   const tablePath = path.join(db, col + ".json");
-  const table = JSON.parse(await read(tablePath));
+  let table: tableType[] = [];
+  try {
+    table = JSON.parse(await read(tablePath));
+  } catch {
+    ora(
+      `${logger.error(
+        `collection with name ${logger.warning(
+          col
+        )} not found in ${logger.warning(db)}`
+      )}`
+    ).fail();
+    return;
+  }
   const filteredData = table.filter((data: tableType) => {
     let flag = true;
     Object.keys(query).forEach((key) => {
@@ -176,11 +244,22 @@ export async function deleteMany(db: string, col: string, query: tableType) {
     });
     return !flag;
   });
-  await update(
-    tablePath,
-    JSON.stringify(filteredData, null, 2),
-    "delete-write"
-  );
+  try {
+    await update(
+      tablePath,
+      JSON.stringify(filteredData, null, 2),
+      "delete-write"
+    );
+  } catch {
+    ora(
+      `${logger.error(
+        `collection with name ${logger.warning(
+          col
+        )} not found in ${logger.warning(db)}`
+      )}`
+    ).fail();
+    return;
+  }
 }
 
 export async function updateMany(
@@ -190,7 +269,19 @@ export async function updateMany(
   updateData: tableType
 ) {
   const tablePath = path.join(db, col + ".json");
-  const table = JSON.parse(await read(tablePath));
+  let table: tableType[] = [];
+  try {
+    table = JSON.parse(await read(tablePath));
+  } catch {
+    ora(
+      `${logger.error(
+        `collection with name ${logger.warning(
+          col
+        )} not found in ${logger.warning(db)}`
+      )}`
+    ).fail();
+    return;
+  }
   const updatedData = table.map((data: tableType) => {
     let flag = true;
     Object.keys(query).forEach((key) => {
@@ -205,5 +296,20 @@ export async function updateMany(
     }
     return data;
   });
-  await update(tablePath, JSON.stringify(updatedData, null, 2), "update-write");
+  try {
+    await update(
+      tablePath,
+      JSON.stringify(updatedData, null, 2),
+      "update-write"
+    );
+  } catch {
+    ora(
+      `${logger.error(
+        `unable to update the collection\ncollection with name ${logger.warning(
+          col
+        )} not found in ${logger.warning(db)}`
+      )}`
+    ).fail();
+    return;
+  }
 }
