@@ -30,8 +30,18 @@ export const insert = new Command()
       ora(logger.error("pls provide a collection to insert")).fail();
       process.exit();
     }
-
-    insertItems(db, colName, [data], true);
+    try {
+      if (!db || !colName) {
+        ora(
+          logger.error("pls provide a database and a collection to insert")
+        ).fail();
+        return;
+      }
+      await insertItems(db, colName, [data], true);
+      ora(logger.success("data inserted successfully")).succeed();
+    } catch (error) {
+      ora(logger.error(`failed to insert data: ${error.message}`)).fail();
+    }
   });
 
 async function parser(str: string) {
