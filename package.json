@@ -9,7 +9,8 @@
   "scripts": {
     "build": "rm -rf dist && tsup && tsc --emitDeclarationOnly",
     "dev": "tsup --onSuccess \"node dist/index.js\"",
-    "test": "node dist/cli/cli.js"
+    "test": "node dist/cli/cli.js",
+    "pub" : "pnpm build && pnpm publish --access public"
   },
   "keywords": [],
   "author": "",
