@@ -39,4 +39,5 @@ yarn-error.log*
 
 # local history
 .history
-.todo
+.todo.md
+image.png

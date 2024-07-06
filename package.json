@@ -1,6 +1,6 @@
 {
   "name": "@raphael-08/gdb",
-  "version": "0.4.15",
+  "version": "0.5.15",
   "description": "",
   "main": "dist/api/api.js",
   "bin": "dist/cli/cli.js",
@@ -9,7 +9,8 @@
   "scripts": {
     "build": "rm -rf dist && tsup && tsc --emitDeclarationOnly",
     "dev": "tsup --onSuccess \"node dist/index.js\"",
-    "test": "node dist/cli/cli.js"
+    "test": "node dist/cli/cli.js",
+    "pub" : "pnpm build && pnpm publish --access public"
   },
   "keywords": [],
   "author": "",
