@@ -10,6 +10,7 @@ import {
   updateRef,
 } from "../api";
 import { logger } from "@/cli/utils/logger";
+import { EmptyTableError } from "../utils/errors";
 
 interface SchemaField {
   field: string;
@@ -82,7 +83,21 @@ export async function insert(
   let table: tableType[] = [];
   try {
     table = JSON.parse(await read(tablePath));
+    if (table.length === 0) {
+      throw EmptyTableError("Table is empty");
+    }
   } catch (error) {
+    if (error.name === "EmptyTableError") {
+      ora(
+        `${logger.error(
+          `collection with name ${logger.warning(
+            col
+          )} is empty in ${logger.warning(db)}`
+        )}`
+      ).fail();
+      return;
+    }
+
     ora(
       `${logger.error(
         `collection with name ${logger.warning(
@@ -173,9 +188,9 @@ export async function startTransaction() {
 }
 
 export async function transactionSuccess() {
-  try{
+  try {
     await deleteFile("transaction.json");
-  }catch{
+  } catch {
     ora(`${logger.error(`No transaction to succeed`)}`).fail();
     return;
   }
@@ -198,7 +213,20 @@ export async function findAll(db: string, col: string, query: tableType) {
   let table: tableType[] = [];
   try {
     table = JSON.parse(await read(tablePath));
-  } catch {
+    if (table.length === 0) {
+      throw EmptyTableError("Table is empty");
+    }
+  } catch (error) {
+    if (error.name === "EmptyTableError") {
+      ora(
+        `${logger.error(
+          `collection with name ${logger.warning(
+            col
+          )} is empty in ${logger.warning(db)}`
+        )}`
+      ).fail();
+      return;
+    }
     ora(
       `${logger.error(
         `collection with name ${logger.warning(
@@ -225,7 +253,20 @@ export async function deleteMany(db: string, col: string, query: tableType) {
   let table: tableType[] = [];
   try {
     table = JSON.parse(await read(tablePath));
-  } catch {
+    if (table.length === 0) {
+      throw EmptyTableError("Table is empty");
+    }
+  } catch (error) {
+    if (error.name === "EmptyTableError") {
+      ora(
+        `${logger.error(
+          `collection with name ${logger.warning(
+            col
+          )} is empty in ${logger.warning(db)}`
+        )}`
+      ).fail();
+      return;
+    }
     ora(
       `${logger.error(
         `collection with name ${logger.warning(
@@ -272,7 +313,20 @@ export async function updateMany(
   let table: tableType[] = [];
   try {
     table = JSON.parse(await read(tablePath));
-  } catch {
+    if (table.length === 0) {
+      throw EmptyTableError("Table is empty");
+    }
+  } catch (error) {
+    if (error.name === "EmptyTableError") {
+      ora(
+        `${logger.error(
+          `collection with name ${logger.warning(
+            col
+          )} is empty in ${logger.warning(db)}`
+        )}`
+      ).fail();
+      return;
+    }
     ora(
       `${logger.error(
         `collection with name ${logger.warning(
