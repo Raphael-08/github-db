@@ -47,7 +47,7 @@ export const updateMany = new Command()
     }
   });
 
-function parser(str: string) {
+async function parser(str: string) {
   const regex = str.match(/\[([^:\]]+):([^\]]+)\]/g);
   if (!regex) {
     throw new Error("No valid properties found in the string");
