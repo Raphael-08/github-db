@@ -10,10 +10,9 @@ export const deleteMany = new Command()
   .argument("<colName> ", "Name of the collection")
   .argument(
     "[data...]",
-    "The query to find the documents to delete in the format [key:value] [key:value]"
+    "The query to find the documents to delete in the format [key:value]"
   )
   .action(async (db, colName, data) => {
-    console.log(db, colName, data);
     const combinedData = Array.isArray(data) ? data.join(" ") : data;
 
     if (combinedData.length === 0) {
@@ -24,7 +23,6 @@ export const deleteMany = new Command()
     }
     try {
       const deleteData = await parser(combinedData);
-      console.log(deleteData);
       if (!db || !colName) {
         ora().fail(
           logger.error("Please provide a valid database and collection name")
