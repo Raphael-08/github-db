@@ -10,7 +10,11 @@ import {
   updateRef,
 } from "../api";
 import { logger } from "@/cli/utils/logger";
-import { EmptyTableError } from "../utils/errors";
+import {
+  EmptyTableError,
+  UnsuccesfullError,
+  UserMessedWithDBError,
+} from "../utils/errors";
 
 interface SchemaField {
   field: string;
@@ -82,20 +86,23 @@ export async function insert(
   const tablePath = path.join(db, col + ".json");
   let table: tableType[] = [];
   try {
-    table = JSON.parse(await read(tablePath));
-    if (table.length === 0) {
-      throw EmptyTableError("Table is empty");
+    const jsonData = await read(tablePath);
+    if (jsonData === "[]" || jsonData.length < 2) {
+      throw UserMessedWithDBError("User messed with the database");
     }
+    table = JSON.parse(jsonData);
   } catch (error) {
-    if (error.name === "EmptyTableError") {
+    if (error.name === "UserMessedWithDBError") {
       ora(
         `${logger.error(
-          `collection with name ${logger.warning(
+          `${logger.warning(
+            error.name
+          )}: user messed collection with name ${logger.warning(
             col
-          )} is empty in ${logger.warning(db)}`
+          )} in ${logger.warning(db)}`
         )}`
       ).fail();
-      return;
+      throw UnsuccesfullError("Unsuccesfull");
     }
 
     ora(
@@ -105,7 +112,7 @@ export async function insert(
         )} not found in ${logger.warning(db)}`
       )}`
     ).fail();
-    return;
+    throw UnsuccesfullError("Unsuccesfull");
   }
   for (const item of validatedData) {
     table.push(item);
@@ -142,15 +149,19 @@ async function validate(
   let metaData: string;
   try {
     metaData = await read(metaDataPath);
-  } catch {
-    ora(
-      `${logger.error(
-        `collection with name ${logger.warning(
-          col
-        )} not found in ${logger.warning(db)}`
-      )}`
-    ).fail();
-    return;
+  } catch (error) {
+    if (error.name === "HttpError") {
+      ora(
+        `${logger.error(
+          `${logger.warning(
+            "MetaDataNotOFoundError"
+          )}: collection with name ${logger.warning(
+            col
+          )} doesn't have metadata in ${logger.warning(db)}`
+        )}`
+      ).fail();
+      return;
+    }
   }
   const fields = JSON.parse(metaData);
   const type = createType(fields);
@@ -220,7 +231,7 @@ export async function findAll(db: string, col: string, query: tableType) {
     if (error.name === "EmptyTableError") {
       ora(
         `${logger.error(
-          `collection with name ${logger.warning(
+          `${logger.warning(error.name)}: collection with name ${logger.warning(
             col
           )} is empty in ${logger.warning(db)}`
         )}`
@@ -260,7 +271,7 @@ export async function deleteMany(db: string, col: string, query: tableType) {
     if (error.name === "EmptyTableError") {
       ora(
         `${logger.error(
-          `collection with name ${logger.warning(
+          `${logger.warning(error.name)}: collection with name ${logger.warning(
             col
           )} is empty in ${logger.warning(db)}`
         )}`
@@ -320,7 +331,7 @@ export async function updateMany(
     if (error.name === "EmptyTableError") {
       ora(
         `${logger.error(
-          `collection with name ${logger.warning(
+          `${logger.warning(error.name)}: collection with name ${logger.warning(
             col
           )} is empty in ${logger.warning(db)}`
         )}`
