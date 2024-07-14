@@ -1,7 +1,7 @@
 import { Octokit } from "@octokit/rest";
-// import * as dotenv from "dotenv";
+import * as dotenv from "dotenv";
 
-// dotenv.config();
+dotenv.config();
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const OWNER = process.env.GITHUB_REPO_OWNER;
