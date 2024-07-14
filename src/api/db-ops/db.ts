@@ -87,7 +87,7 @@ export async function insert(
   let table: tableType[] = [];
   try {
     const jsonData = await read(tablePath);
-    if (jsonData === "[]" || jsonData.length < 2) {
+    if (!(jsonData === "[]") || jsonData.length < 2) {
       throw UserMessedWithDBError("User messed with the database");
     }
     table = JSON.parse(jsonData);
