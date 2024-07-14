@@ -83,7 +83,7 @@ export async function insert(
   let table: tableType[] = [];
   try {
     const jsonData = await read(tablePath);
-    if (!(jsonData === "[]") || jsonData.length < 2) {
+    if (jsonData === "[]" || jsonData.length < 2) {
       throw ErrorHandler("UserMessedWithDBError", "User messed with db");
     }
     table = JSON.parse(jsonData);
@@ -373,4 +373,35 @@ export async function updateMany(
     ).fail();
     return;
   }
+}
+
+export async function getTable(db: string, col: string) {
+  const tablePath = path.join(db, col + ".json");
+  let table: tableType[] = [];
+  try {
+    table = JSON.parse(await read(tablePath));
+    if (table.length === 0) {
+      throw ErrorHandler("EmptyTableError", "Table is empty");
+    }
+  } catch (error) {
+    if (error.name === "EmptyTableError") {
+      ora(
+        `${logger.error(
+          `${logger.warning(error.name)}: collection with name ${logger.warning(
+            col
+          )} is empty in ${logger.warning(db)}`
+        )}`
+      ).fail();
+      return;
+    }
+    ora(
+      `${logger.error(
+        `collection with name ${logger.warning(
+          col
+        )} not found in ${logger.warning(db)}`
+      )}`
+    ).fail();
+    return;
+  }
+  return table;
 }
