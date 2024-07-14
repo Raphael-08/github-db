@@ -10,6 +10,7 @@ import { packageJSON } from "./utils/package-json";
 import { Command } from "commander";
 import { updateMany } from "./commands/update";
 import { deleteMany } from "./commands/delete";
+import { showTable } from "./commands/showTable";
 
 (async () => {
   const program = new Command();
@@ -32,6 +33,7 @@ import { deleteMany } from "./commands/delete";
     .addCommand(succeedTransaction)
     .addCommand(rollBack)
     .addCommand(updateMany)
-    .addCommand(deleteMany);
+    .addCommand(deleteMany)
+    .addCommand(showTable);
   program.parse();
 })();
