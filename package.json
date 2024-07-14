@@ -1,6 +1,6 @@
 {
   "name": "@raphael-08/gdb",
-  "version": "0.5.15",
+  "version": "0.6.15",
   "description": "",
   "main": "dist/api/api.js",
   "bin": "dist/cli/cli.js",
@@ -10,7 +10,7 @@
     "build": "rm -rf dist && tsup && tsc --emitDeclarationOnly",
     "dev": "tsup --onSuccess \"node dist/index.js\"",
     "test": "node dist/cli/cli.js",
-    "pub" : "pnpm build && pnpm publish --access public"
+    "pub": "pnpm build && pnpm publish --access public"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +25,7 @@
     "@octokit/rest": "^20.1.1",
     "@types/node": "^20.14.5",
     "chalk": "^5.3.0",
+    "cli-table3": "^0.6.5",
     "commander": "^12.1.0",
     "dotenv": "^16.4.5",
     "execa": "^9.3.0",
@@ -32,5 +33,6 @@
     "prompts": "^2.4.2",
     "type-fest": "^4.20.1",
     "zod": "^3.23.8"
-  }
+  },
+  "packageManager": "pnpm@9.4.0"
 }
