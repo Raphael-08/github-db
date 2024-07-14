@@ -10,11 +10,7 @@ import {
   updateRef,
 } from "../api";
 import { logger } from "@/cli/utils/logger";
-import {
-  EmptyTableError,
-  UnsuccesfullError,
-  UserMessedWithDBError,
-} from "../utils/errors";
+import { ErrorHandler } from "../utils/errors";
 
 interface SchemaField {
   field: string;
@@ -88,7 +84,7 @@ export async function insert(
   try {
     const jsonData = await read(tablePath);
     if (jsonData === "[]" || jsonData.length < 2) {
-      throw UserMessedWithDBError("User messed with the database");
+      throw ErrorHandler("UserMessedWithDBError", "User messed with db");
     }
     table = JSON.parse(jsonData);
   } catch (error) {
@@ -102,7 +98,7 @@ export async function insert(
           )} in ${logger.warning(db)}`
         )}`
       ).fail();
-      throw UnsuccesfullError("Unsuccesfull");
+      throw ErrorHandler("UnsuccessfulError", "Unsuccesfull");
     }
 
     ora(
@@ -112,7 +108,7 @@ export async function insert(
         )} not found in ${logger.warning(db)}`
       )}`
     ).fail();
-    throw UnsuccesfullError("Unsuccesfull");
+    throw ErrorHandler("UnsuccessfulError", "Unsuccesfull");
   }
   for (const item of validatedData) {
     table.push(item);
@@ -225,7 +221,7 @@ export async function findAll(db: string, col: string, query: tableType) {
   try {
     table = JSON.parse(await read(tablePath));
     if (table.length === 0) {
-      throw EmptyTableError("Table is empty");
+      throw ErrorHandler("EmptyTableError", "Table is empty");
     }
   } catch (error) {
     if (error.name === "EmptyTableError") {
@@ -265,7 +261,7 @@ export async function deleteMany(db: string, col: string, query: tableType) {
   try {
     table = JSON.parse(await read(tablePath));
     if (table.length === 0) {
-      throw EmptyTableError("Table is empty");
+      throw ErrorHandler("EmptyTableError", "Table is empty");
     }
   } catch (error) {
     if (error.name === "EmptyTableError") {
@@ -325,7 +321,7 @@ export async function updateMany(
   try {
     table = JSON.parse(await read(tablePath));
     if (table.length === 0) {
-      throw EmptyTableError("Table is empty");
+      throw ErrorHandler("EmptyTableError", "Table is empty");
     }
   } catch (error) {
     if (error.name === "EmptyTableError") {
