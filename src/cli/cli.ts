@@ -9,6 +9,7 @@ import { rollBack } from "./commands/rollback";
 import { packageJSON } from "./utils/package-json";
 import { Command } from "commander";
 import { updateMany } from "./commands/update";
+import { deleteMany } from "./commands/delete";
 
 (async () => {
   const program = new Command();
@@ -30,6 +31,7 @@ import { updateMany } from "./commands/update";
     .addCommand(transactionStart)
     .addCommand(succeedTransaction)
     .addCommand(rollBack)
-    .addCommand(updateMany);
+    .addCommand(updateMany)
+    .addCommand(deleteMany);
   program.parse();
 })();
