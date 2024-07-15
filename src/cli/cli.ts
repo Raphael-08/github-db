@@ -11,6 +11,7 @@ import { Command } from "commander";
 import { updateMany } from "./commands/update";
 import { deleteMany } from "./commands/delete";
 import { showTable } from "./commands/showTable";
+import { findAll } from "./commands/find";
 
 (async () => {
   const program = new Command();
@@ -34,6 +35,7 @@ import { showTable } from "./commands/showTable";
     .addCommand(rollBack)
     .addCommand(updateMany)
     .addCommand(deleteMany)
-    .addCommand(showTable);
+    .addCommand(showTable)
+    .addCommand(findAll);
   program.parse();
 })();
