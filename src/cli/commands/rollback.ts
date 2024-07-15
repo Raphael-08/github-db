@@ -8,5 +8,9 @@ export const rollBack = new Command()
   .description("succeeds a transaction")
   .action(async () => {
     await rollback();
-    ora(logger.success("transaction successfully rolled back")).succeed();
+    ora(
+      logger.success(
+        "If there is a transaction in progress .it will get rolled back "
+      )
+    ).succeed();
   });
