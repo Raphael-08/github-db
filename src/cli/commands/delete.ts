@@ -30,13 +30,13 @@ export const deleteMany = new Command()
         return;
       }
       if (Object.keys(deleteData).length === 0) {
-        ora().fail(logger.error("Query or update data cannot be empty"));
+        ora().fail(logger.error("Query or delete data cannot be empty"));
         return;
       }
       await deleteItems(db, colName, deleteData);
-      ora(logger.success("Data updated successfully"));
+      ora(logger.success("Data deleted successfully")).succeed();
     } catch (error) {
-      ora().fail(logger.error(`Failed to update data: ${error.message}`));
+      ora(logger.error(`failed to delete data: ${error.message}`)).fail();
     }
   });
 async function parser(str: string) {

@@ -41,9 +41,9 @@ export const updateMany = new Command()
       }
 
       await updateItems(db, colName, query, updateData);
-      ora(logger.success("Data updated successfully"));
+      ora(logger.success("Data updated successfully")).succeed();
     } catch (error) {
-      ora().fail(logger.error(`Failed to update data: ${error.message}`));
+      ora(logger.error(`failed to updated data: ${error.message}`)).fail();
     }
   });
 
