@@ -1,5 +1,5 @@
 import { updateMany as updateItems } from "@/api/api";
-import { tableType, validate } from "@/api/db-ops/db";
+import { validate } from "@/api/db-ops/db";
 import { logger } from "../utils/logger";
 import { Command } from "commander";
 import ora from "ora";
@@ -40,9 +40,9 @@ export const updateMany = new Command()
         ora().fail(logger.error("Query or update data cannot be empty"));
         return;
       }
-      const validatedQuery = await validate(db, colName, query, true);
-      const validatedUpdateData = await validate(db, colName, updateData, true);
-      await updateItems(db, colName, validatedQuery, validatedUpdateData);
+      const validatedQuery = await validate(db, colName, [query], true);
+      const validatedUpdateData = await validate(db, colName, [updateData], true);
+      await updateItems(db, colName, validatedQuery[0], validatedUpdateData[0]);
       ora(logger.success("Data updated successfully")).succeed();
     } catch (error) {
       ora(logger.error(`failed to updated data: ${error.message}`)).fail();
@@ -57,9 +57,9 @@ async function parser(str: string) {
 
   const properties = regex.map((prop) => prop.slice(1, -1));
 
-  let query: tableType[];
-  let updateData: tableType[];
-
+  let query = {};
+  let updateData = {};
+  console.log(properties);
   properties.forEach((property, index) => {
     const [propertyName, propertyValue] = property
       .split(":")
