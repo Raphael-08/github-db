@@ -40,8 +40,8 @@ export const updateMany = new Command()
         ora().fail(logger.error("Query or update data cannot be empty"));
         return;
       }
-      const validatedQuery = await validate(db, colName, [query], true);
-      const validatedUpdateData = await validate(db, colName, [updateData], true);
+      const validatedQuery = await validate(db, colName, [query], true, true);
+      const validatedUpdateData = await validate(db, colName, [updateData], true, true);
       await updateItems(db, colName, validatedQuery[0], validatedUpdateData[0]);
       ora(logger.success("Data updated successfully")).succeed();
     } catch (error) {
@@ -59,7 +59,6 @@ async function parser(str: string) {
 
   let query = {};
   let updateData = {};
-  console.log(properties);
   properties.forEach((property, index) => {
     const [propertyName, propertyValue] = property
       .split(":")

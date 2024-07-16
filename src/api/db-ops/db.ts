@@ -139,7 +139,8 @@ export async function validate(
   db: string,
   col: string,
   data: tableType[],
-  Dtypes: boolean = false
+  Dtypes: boolean = false,
+  partialValidation: boolean = false
 ): Promise<tableType[]> {
   const metaDataPath = path.join(db, "metadata", col + ".json");
   let metaData: string;
@@ -161,7 +162,12 @@ export async function validate(
   }
   const fields = JSON.parse(metaData);
   const schemaObject = Object.fromEntries(
-    fields.map((field: SchemaField) => [field.field, z.optional(types[field.fieldType][0])])
+    fields.map((field: SchemaField) => [
+      field.field,
+      partialValidation
+        ? z.optional(types[field.fieldType][0])
+        : types[field.fieldType][0],
+    ])
   );
   const schema = z.object(schemaObject);
   if (Dtypes) {
