@@ -26,7 +26,7 @@ const types = {
   undefined: [z.undefined(), undefined],
 };
 
-type tableType = {
+export type tableType = {
   [key: string]: any;
 };
 
@@ -135,11 +135,11 @@ function createType(metadata: SchemaField[]) {
   return reducedMD;
 }
 
-async function validate(
+export async function validate(
   db: string,
   col: string,
   data: tableType[],
-  Dtypes: boolean
+  Dtypes: boolean = false
 ): Promise<tableType[]> {
   const metaDataPath = path.join(db, "metadata", col + ".json");
   let metaData: string;
