@@ -160,12 +160,12 @@ export async function validate(
     }
   }
   const fields = JSON.parse(metaData);
-  const type = createType(fields);
   const schemaObject = Object.fromEntries(
-    fields.map((field: SchemaField) => [field.field, types[field.fieldType][0]])
+    fields.map((field: SchemaField) => [field.field, z.optional(types[field.fieldType][0])])
   );
   const schema = z.object(schemaObject);
   if (Dtypes) {
+    const type = createType(fields);
     for (const item of data) {
       Object.keys(item).forEach((key) => {
         item[key] = types[type[key]][1](item[key]);
