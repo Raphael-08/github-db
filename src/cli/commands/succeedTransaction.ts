@@ -8,5 +8,5 @@ export const succeedTransaction = new Command()
   .description("succeeds a transaction")
   .action(async () => {
     await transaction();
-    ora(logger.success("transaction started successfully")).succeed();
+    ora(logger.success("transaction successful")).succeed();
   });
