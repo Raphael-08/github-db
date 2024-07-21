@@ -1,5 +1,5 @@
 import { updateMany as updateItems } from "@/api/api";
-import { validate } from "@/api/db-ops/db";
+import { validate } from "@/api/api";
 import { logger } from "../utils/logger";
 import { Command } from "commander";
 import ora from "ora";
@@ -25,7 +25,6 @@ export const updateMany = new Command()
 
     try {
       const { query, updateData } = await parser(combinedData);
-
       if (!db || !colName) {
         ora().fail(
           logger.error("Please provide a valid database and collection name")

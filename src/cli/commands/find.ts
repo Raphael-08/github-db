@@ -52,7 +52,7 @@ export const findAll = new Command()
     }
   });
 
-async function parser(str) {
+async function parser(str: string) {
   const regex = /\[([^:\]]+):([^\]]+)\]/g;
   let match;
   const query = {};

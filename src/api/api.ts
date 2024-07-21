@@ -10,6 +10,7 @@ export { read, write, update, deleteFile, getLatestCommitSha, updateRef };
 import {
   createdb,
   createCol,
+  validate,
   insert,
   findAll,
   updateMany,
@@ -22,6 +23,7 @@ import {
 export {
   createdb,
   createCol,
+  validate,
   insert,
   findAll,
   updateMany,

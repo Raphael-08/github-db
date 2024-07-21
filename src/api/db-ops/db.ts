@@ -123,7 +123,7 @@ export async function insert(
         )} not found in ${logger.warning(db)}`
       )}`
     ).fail();
-    return;
+    throw ErrorHandler("UnsuccessfulError", "Unsuccesfull");
   }
 }
 
@@ -136,13 +136,13 @@ function createType(metadata: SchemaField[]) {
 }
 
 export async function validate(
-  db: string,
-  col: string,
+  database: string,
+  collection: string,
   data: tableType[],
-  Dtypes: boolean = false,
+  typeConversion: boolean = false,
   partialValidation: boolean = false
 ): Promise<tableType[]> {
-  const metaDataPath = path.join(db, "metadata", col + ".json");
+  const metaDataPath = path.join(database, "metadata", collection + ".json");
   let metaData: string;
   try {
     metaData = await read(metaDataPath);
@@ -153,11 +153,11 @@ export async function validate(
           `${logger.warning(
             "MetaDataNotOFoundError"
           )}: collection with name ${logger.warning(
-            col
-          )} doesn't have metadata in ${logger.warning(db)}`
+            collection
+          )} doesn't have metadata in ${logger.warning(database)}`
         )}`
       ).fail();
-      return;
+      throw ErrorHandler("UnsuccessfulError", "Unsuccesfull");
     }
   }
   const fields = JSON.parse(metaData);
@@ -170,7 +170,7 @@ export async function validate(
     ])
   );
   const schema = z.object(schemaObject);
-  if (Dtypes) {
+  if (typeConversion) {
     const type = createType(fields);
     for (const item of data) {
       Object.keys(item).forEach((key) => {
@@ -205,7 +205,7 @@ export async function transactionSuccess() {
     await deleteFile("transaction.json");
   } catch {
     ora(`${logger.error(`No transaction to succeed`)}`).fail();
-    return;
+    throw ErrorHandler("UnsuccessfulError", "Unsuccesfull");
   }
 }
 
@@ -215,7 +215,7 @@ export async function rollBack() {
     transactionDetails = await read("transaction.json");
   } catch {
     ora(`${logger.error(`No transaction to rollback`)}`).fail();
-    return;
+    throw ErrorHandler("UnsuccessfulError", "Unsuccesfull");
   }
   const parsedData = JSON.parse(transactionDetails);
   await updateRef(parsedData[0].transactionCommit);
@@ -238,7 +238,7 @@ export async function findAll(db: string, col: string, query: tableType) {
           )} is empty in ${logger.warning(db)}`
         )}`
       ).fail();
-      return;
+      throw ErrorHandler("UnsuccessfulError", "Unsuccesfull");
     }
     ora(
       `${logger.error(
@@ -247,7 +247,7 @@ export async function findAll(db: string, col: string, query: tableType) {
         )} not found in ${logger.warning(db)}`
       )}`
     ).fail();
-    return;
+    throw ErrorHandler("UnsuccessfulError", "Unsuccesfull");
   }
   const filteredData = table.filter((data: tableType) => {
     let flag = true;
@@ -278,7 +278,7 @@ export async function deleteMany(db: string, col: string, query: tableType) {
           )} is empty in ${logger.warning(db)}`
         )}`
       ).fail();
-      return;
+      throw ErrorHandler("UnsuccessfulError", "Unsuccesfull");
     }
     ora(
       `${logger.error(
@@ -287,7 +287,7 @@ export async function deleteMany(db: string, col: string, query: tableType) {
         )} not found in ${logger.warning(db)}`
       )}`
     ).fail();
-    return;
+    throw ErrorHandler("UnsuccessfulError", "Unsuccesfull");
   }
   const filteredData = table.filter((data: tableType) => {
     let flag = true;
@@ -299,12 +299,33 @@ export async function deleteMany(db: string, col: string, query: tableType) {
     return !flag;
   });
   try {
+    if (
+      !(filteredData.length !== table.length) &&
+      JSON.stringify(filteredData) === JSON.stringify(table)
+    ) {
+      throw ErrorHandler(
+        "NoDataDeletedError",
+        "no data matched with provided query"
+      );
+    }
     await update(
       tablePath,
       JSON.stringify(filteredData, null, 2),
       "delete-write"
     );
-  } catch {
+  } catch (error) {
+    if (error.name === "NoDataDeletedError") {
+      ora(
+        `${logger.error(
+          `${logger.warning(
+            error.name
+          )}: no data matched with provided query in collection with name ${logger.warning(
+            col
+          )} in ${logger.warning(db)}`
+        )}`
+      ).fail();
+      throw ErrorHandler("UnsuccessfulError", "Unsuccesfull");
+    }
     ora(
       `${logger.error(
         `collection with name ${logger.warning(
@@ -312,7 +333,7 @@ export async function deleteMany(db: string, col: string, query: tableType) {
         )} not found in ${logger.warning(db)}`
       )}`
     ).fail();
-    return;
+    throw ErrorHandler("UnsuccessfulError", "Unsuccesfull");
   }
 }
 
@@ -338,7 +359,7 @@ export async function updateMany(
           )} is empty in ${logger.warning(db)}`
         )}`
       ).fail();
-      return;
+      throw ErrorHandler("UnsuccessfulError", "Unsuccesfull");
     }
     ora(
       `${logger.error(
@@ -347,7 +368,7 @@ export async function updateMany(
         )} not found in ${logger.warning(db)}`
       )}`
     ).fail();
-    return;
+    throw ErrorHandler("UnsuccessfulError", "Unsuccesfull");
   }
   const updatedData = table.map((data: tableType) => {
     let flag = true;
@@ -364,12 +385,33 @@ export async function updateMany(
     return data;
   });
   try {
+    if (
+      !(updatedData.length !== table.length) &&
+      JSON.stringify(updatedData) === JSON.stringify(table)
+    ) {
+      throw ErrorHandler(
+        "NoDataUpdatedError",
+        "no data matched with provided query"
+      );
+    }
     await update(
       tablePath,
       JSON.stringify(updatedData, null, 2),
       "update-write"
     );
-  } catch {
+  } catch (error) {
+    if (error.name === "NoDataUpdatedError") {
+      ora(
+        `${logger.error(
+          `${logger.warning(
+            error.name
+          )}: no data matched with provided query in collection with name ${logger.warning(
+            col
+          )} in ${logger.warning(db)}`
+        )}`
+      ).fail();
+      throw ErrorHandler("UnsuccessfulError", "Unsuccesfull");
+    }
     ora(
       `${logger.error(
         `unable to update the collection\ncollection with name ${logger.warning(
@@ -377,8 +419,8 @@ export async function updateMany(
         )} not found in ${logger.warning(db)}`
       )}`
     ).fail();
-    return;
   }
+  throw ErrorHandler("UnsuccessfulError", "Unsuccesfull");
 }
 
 export async function getTable(db: string, col: string) {
@@ -398,7 +440,7 @@ export async function getTable(db: string, col: string) {
           )} is empty in ${logger.warning(db)}`
         )}`
       ).fail();
-      return;
+      throw ErrorHandler("UnsuccessfulError", "Unsuccesfull");
     }
     ora(
       `${logger.error(
@@ -407,7 +449,7 @@ export async function getTable(db: string, col: string) {
         )} not found in ${logger.warning(db)}`
       )}`
     ).fail();
-    return;
+    throw ErrorHandler("UnsuccessfulError", "Unsuccesfull");
   }
   return table;
 }

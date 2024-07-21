@@ -10,10 +10,20 @@ export function UnsuccessfulError(message: string) {
   return { name: "UnsuccessfulError", message };
 }
 
+export function NoDataUpdatedError(message: string) {
+  return { name: "NoDataUpdatedError", message };
+ }
+
+export function NoDataDeletedError(message: string) {
+  return { name: "NoDataDeletedError", message };
+ }
+
 export const ERRORS = {
   EmptyTableError,
   UserMessedWithDBError,
   UnsuccessfulError,
+  NoDataUpdatedError,
+  NoDataDeletedError,
 };
 
 /**

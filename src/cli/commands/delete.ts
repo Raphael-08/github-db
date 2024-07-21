@@ -1,4 +1,5 @@
 import { deleteMany as deleteItems } from "@/api/api";
+import { validate } from "@/api/api";
 import { logger } from "../utils/logger";
 import { Command } from "commander";
 import ora from "ora";
@@ -23,6 +24,7 @@ export const deleteMany = new Command()
     }
     try {
       const deleteData = await parser(combinedData);
+      const validatedDeleteData = await validate(db, colName, [deleteData], true, true);
       if (!db || !colName) {
         ora().fail(
           logger.error("Please provide a valid database and collection name")
@@ -33,12 +35,13 @@ export const deleteMany = new Command()
         ora().fail(logger.error("Query or delete data cannot be empty"));
         return;
       }
-      await deleteItems(db, colName, deleteData);
+      await deleteItems(db, colName, validatedDeleteData);
       ora(logger.success("Data deleted successfully")).succeed();
     } catch (error) {
       ora(logger.error(`failed to delete data: ${error.message}`)).fail();
     }
   });
+
 async function parser(str: string) {
   const matches = str.match(/\[([^:\]]+):([^\]]+)\]/g);
   if (!matches) {
